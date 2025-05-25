@@ -18,7 +18,7 @@ Inspired by a few languages I find most useful in my own day-to-day, such as Pyt
 func print_item($item):
     println "The item printed is ${item}"
 
-for(key: value ~ list1) find (math.mean) finished: (print_item)
+for (key: value ~ list1) find (math.mean) finished: (print_item)
 ```
 
 ### Shorthand
