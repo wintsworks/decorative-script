@@ -46,7 +46,7 @@ db: "connection string"
         println(db->where
                     users.id = id)
 
-    post "/users"
+    post "/users":
         println(db->where
                     users.id = id)
 ```
