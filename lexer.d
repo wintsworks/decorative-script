@@ -157,8 +157,16 @@ struct Lexer {
             // checking for keywords
             if (auto tokenTypePtr = lexeme in keywords) {
                 return Token(*tokenTypePtr, lexeme, tokenStartln, tokenStartcol);
+            } else if (isDigit(currTokStartchar)) {
+
+                string numberLexeme = "";
+                numberLexeme ~= currTokStartchar;
+
+                while(!atEnd() && isDigit(viewDc())) {
+                    numberLexeme ~= nextChar();
+                }
             } else {
-                return Token(TokenType.IDENTIFIER, lexeme, tokenStartln, tokenStartcol);
+                return Token(TokenType.IDENTIFIER, numberLexeme, tokenStartln, tokenStartcol);
             }
         } else {
             switch (currTokStartchar) {
