@@ -145,43 +145,58 @@ struct Lexer
 
         char currTokStartchar = nextChar();
 
-        switch (currTokStartchar)
+        if (isAlpha(currTokStartchar))
         {
-        case '(':
-            return Token(TokenType.LPAREN, "(", tokenStartln, tokenStartcol);
-        case ')':
-            return Token(TokenType.RPAREN, ")", tokenStartln, tokenStartcol);
-        case '{':
-            return Token(TokenType.LBRACE, "{", tokenStartln, tokenStartcol);
-        case '}':
-            return Token(TokenType.RBRACE, "}", tokenStartln, tokenStartcol);
-        case ';':
-            return Token(TokenType.SEMICOLON, ";", tokenStartln, tokenStartcol);
-        case ',':
-            return Token(TokenType.COMMA, ",", tokenStartln, tokenStartcol);
-        case '+':
-            return Token(TokenType.OP_PLUS, "+", tokenStartln, tokenStartcol);
-        case '-':
-            return Token(TokenType.OP_MINUS, "-", tokenStartln, tokenStartcol);
-        case '*':
-            return Token(TokenType.OP_MULTIPLY, "*", tokenStartln, tokenStartcol);
-        case '/':
-            return Token(TokenType.OP_DIVIDE, "/", tokenStartln, tokenStartcol);
-        case '%':
-            return Token(TokenType.OP_MODULO, "%", tokenStartln, tokenStartcol);
-        case '&':
-            return Token(TokenType.OP_REF, "&", tokenStartln, tokenStartcol);
-        case '=':
-            return Token(TokenType.OP_ASSIGN, "=", tokenStartln, tokenStartcol);
-        default:
-            return Token(TokenType.UNKNOWN, currTokStartchar.to!string, tokenStartln, tokenStartcol);
+            string lexeme = "";
+            lexeme ~= currTokStartchar;
+
+            while (!atEnd() && isAlphaNum(viewDc()))
+                lexeme ~= nextChar();
+
+            // For now, return as IDENTIFIER. We'll add keyword checking soon.
+            return Token(TokenType.IDENTIFIER, lexeme, tokenStartln, tokenStartcol);
         }
+        else
+        {
+            switch (currTokStartchar)
+            {
+            case '(':
+                return Token(TokenType.LPAREN, "(", tokenStartln, tokenStartcol);
+            case ')':
+                return Token(TokenType.RPAREN, ")", tokenStartln, tokenStartcol);
+            case '{':
+                return Token(TokenType.LBRACE, "{", tokenStartln, tokenStartcol);
+            case '}':
+                return Token(TokenType.RBRACE, "}", tokenStartln, tokenStartcol);
+            case ';':
+                return Token(TokenType.SEMICOLON, ";", tokenStartln, tokenStartcol);
+            case ',':
+                return Token(TokenType.COMMA, ",", tokenStartln, tokenStartcol);
+            case '+':
+                return Token(TokenType.OP_PLUS, "+", tokenStartln, tokenStartcol);
+            case '-':
+                return Token(TokenType.OP_MINUS, "-", tokenStartln, tokenStartcol);
+            case '*':
+                return Token(TokenType.OP_MULTIPLY, "*", tokenStartln, tokenStartcol);
+            case '/':
+                return Token(TokenType.OP_DIVIDE, "/", tokenStartln, tokenStartcol);
+            case '%':
+                return Token(TokenType.OP_MODULO, "%", tokenStartln, tokenStartcol);
+            case '&':
+                return Token(TokenType.OP_REF, "&", tokenStartln, tokenStartcol);
+            case '=':
+                return Token(TokenType.OP_ASSIGN, "=", tokenStartln, tokenStartcol);
+            default:
+                return Token(TokenType.UNKNOWN, currTokStartchar.to!string, tokenStartln, tokenStartcol);
+            }
+        }
+
     }
 }
 
 void main()
 {
-    string codeToToken = "{\n + -;\n}";
+    string codeToToken = "{\n variableName & + -;\n}";
     Lexer lex = Lexer(codeToToken);
 
     writeln("Tokenizing: \"", codeToToken.replace("\n", "\\n"), "\"");
