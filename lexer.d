@@ -4,8 +4,7 @@ import std.array;
 import std.ascii;
 import std.conv;
 
-enum TokenType
-{
+enum TokenType {
     // Keywords
     KW_INT,
     KW_FLOAT,
@@ -50,29 +49,42 @@ enum TokenType
 }
 
 // Struct to represent a token
-struct Token
-{
+struct Token {
     TokenType type; // The type of the token
     string lexeme; // The actual text of the token (e.g., "if", "myVar", "123")
     int line; // Line number where the token starts
     int column; // Column number where the token starts
 
     // A simple toString for easy printing
-    string toString() const
-    {
+    string toString() const {
         return format("Token(Type: %s, Lexeme: \"%s\", Line: %d, Col: %d)", type, lexeme, line, column);
     }
 }
 
-struct Lexer
-{
+struct Lexer {
+    static immutable TokenType[string] keywords;
+
+    shared static this() {
+        keywords = [
+            "int": TokenType.KW_INT,
+            "uint": TokenType.KW_UINT,
+            "float": TokenType.KW_FLOAT,
+            "ufloat": TokenType.KW_UFLOAT,
+            "void": TokenType.KW_VOID,
+            "if": TokenType.KW_IF,
+            "else": TokenType.KW_ELSE,
+            "grab": TokenType.KW_GRAB,
+            "async": TokenType.KW_ASYNC,
+            "return": TokenType.KW_RETURN,
+        ];
+    }
+
     string source;
     int currIndex;
     int line;
     int column;
 
-    this(string sourceCode)
-    {
+    this(string sourceCode) {
         this.source = sourceCode;
         this.currIndex = 0;
         this.line = 1;
@@ -83,25 +95,19 @@ struct Lexer
         Checks if the end of source has been reached.
         @return bool 
      */
-    bool atEnd()
-    {
+    bool atEnd() {
         return currIndex >= source.length;
     }
 
-    char nextChar()
-    {
-        if (!atEnd())
-        {
+    char nextChar() {
+        if (!atEnd()) {
             char currChar = source[currIndex];
             currIndex++;
 
-            if (currChar == '\n')
-            {
+            if (currChar == '\n') {
                 line++;
                 column = 1;
-            }
-            else
-            {
+            } else {
                 column++;
             }
             return currChar;
@@ -113,17 +119,14 @@ struct Lexer
     /** 
      * View, don't consume.
      */
-    char viewDc()
-    {
+    char viewDc() {
         if (atEnd())
             return '\0';
         return source[currIndex];
     }
 
-    void skipWS()
-    {
-        while (!atEnd())
-        {
+    void skipWS() {
+        while (!atEnd()) {
             char c = viewDc();
 
             if (isWhite(c))
@@ -133,8 +136,7 @@ struct Lexer
         }
     }
 
-    Token nextTok()
-    {
+    Token nextTok() {
         skipWS();
 
         int tokenStartln = line;
@@ -145,21 +147,21 @@ struct Lexer
 
         char currTokStartchar = nextChar();
 
-        if (isAlpha(currTokStartchar))
-        {
+        if (isAlpha(currTokStartchar)) {
             string lexeme = "";
             lexeme ~= currTokStartchar;
 
             while (!atEnd() && isAlphaNum(viewDc()))
                 lexeme ~= nextChar();
 
-            // For now, return as IDENTIFIER. We'll add keyword checking soon.
-            return Token(TokenType.IDENTIFIER, lexeme, tokenStartln, tokenStartcol);
-        }
-        else
-        {
-            switch (currTokStartchar)
-            {
+            // checking for keywords
+            if (auto tokenTypePtr = lexeme in keywords) {
+                return Token(*tokenTypePtr, lexeme, tokenStartln, tokenStartcol);
+            } else {
+                return Token(TokenType.IDENTIFIER, lexeme, tokenStartln, tokenStartcol);
+            }
+        } else {
+            switch (currTokStartchar) {
             case '(':
                 return Token(TokenType.LPAREN, "(", tokenStartln, tokenStartcol);
             case ')':
@@ -194,17 +196,15 @@ struct Lexer
     }
 }
 
-void main()
-{
-    string codeToToken = "{\n variableName & + -;\n}";
+void main() {
+    string codeToToken = "{\n if variableName & + -;\n}";
     Lexer lex = Lexer(codeToToken);
 
     writeln("Tokenizing: \"", codeToToken.replace("\n", "\\n"), "\"");
 
     Token token;
 
-    do
-    {
+    do {
         token = lex.nextTok();
         writeln(token);
     }
